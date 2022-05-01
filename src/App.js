@@ -7,20 +7,21 @@ const SERVER = process.env.REACT_APP_SERVER;
 
 function App() {
 
-  const [list, setList] = useState([]);
+  const [barList, setBarList] = useState([]);
+  const [tableList, setTableList] = useState([]);
 
   async function fetchList() {
     let response = await axios.get(`${SERVER}/getlist`);
-    setList(response.data)
+    setBarList(response.data)
   }
 
-  async function deleteCustomer(id){
-    try{
+  async function deleteCustomer(id) {
+    try {
       await axios.delete(`${SERVER}/delete/${id}`)
       fetchList();
-    } catch(e){
+    } catch (e) {
       console.log(e.message)
-    }    
+    }
   }
 
   useEffect(() => {
@@ -30,14 +31,37 @@ function App() {
 
   return (
     <>
-      <div className='container'>
-        {list.map((customer, idx) => {
-          return (
-              <p key={customer.id} id={customer.id} className='draggable' draggable='true'>{customer.value.name}<button className='delete-btn' onClick={()=> deleteCustomer(customer.id)}>X</button></p>
-          )
-        })}
-      </div>
       <AddCustomerForm fetchList={fetchList} />
+      <section className='container'>
+        <div className='sub-container'>
+          {barList.map((customer, idx) => {
+            return (
+              <p
+                key={customer.id}
+                id={customer.id}
+                className='draggable'
+                draggable='true'>
+                {customer.value.name}
+                <button className='delete-btn' onClick={() => deleteCustomer(customer.id)}>X</button>
+              </p>
+            )
+          })}
+        </div>
+        <div className='sub-container'>
+          {tableList.map((customer, idx) => {
+            return (
+              <p
+                key={customer.id}
+                id={customer.id}
+                className='draggable'
+                draggable='true'>
+                {customer.value.name}
+                <button className='delete-btn' onClick={() => deleteCustomer(customer.id)}>X</button>
+              </p>
+            )
+          })}
+        </div>
+      </section>
     </>
   );
 }
