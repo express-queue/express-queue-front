@@ -1,0 +1,62 @@
+@mixin elements {
+  background-color: white;
+  padding: 1rem;
+  border: 1px solid black;
+}
+
+@mixin container {
+  padding: 1rem;
+  margin: auto;
+  margin-top: 5rem;
+  width: 20vw;
+  min-width: 200px;
+  max-width: 300px;
+  text-align: center;
+}
+
+body {
+  margin: 0;
+  background-color: rgb(171, 171, 171);
+}
+
+.container {
+  @include container;
+  background-color: #333;
+}
+
+.draggable {
+  @include elements;
+  cursor: move;
+}
+
+form {
+  @include container;
+  background-color: rgb(204, 197, 197);
+  font-size: x-large;
+}
+
+form>* {
+  display: block;
+  font-size: x-large;
+  margin: 1rem auto;
+  overflow: auto;
+}
+
+.radio-buttons {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+input[type="text"] {
+  width: 90%
+}
+
+input[type="radio"] {
+  transform: scale(1.5);
+  margin-right: 8px;
+}
+
+.delete-btn{
+  position: relative;
+  right: 0;
+}
