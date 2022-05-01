@@ -6,20 +6,26 @@ const SERVER = process.env.REACT_APP_SERVER;
 export default function AddCustomerForm({ fetchList }) {
 
   const [name, setName] = useState('');
-  const [side, setSide] = useState('bottom');
+  const [area, setArea] = useState('table')
+  const [queue, setQueue] = useState('back');
 
   function handleChange(e) {
     setName(e.target.value);
   }
 
-  function handleRadioChange(e) {
-    setSide(e.target.value);
+  function handleAreaChange(e) {
+    setArea(e.target.value);
   }
+
+  function handleQueueChange(e) {
+    setQueue(e.target.value);
+  }
+
 
   async function handleSumbit(e) {
     console.log('trying to submit')
     e.preventDefault();
-    let endpoint = side === 'bottom' ? 'add' : 'prepend'
+    let endpoint = queue === 'back' ? 'add' : 'prepend';
     let data = { value: { name } }
 
     try {
@@ -38,15 +44,29 @@ export default function AddCustomerForm({ fetchList }) {
     <form onSubmit={handleSumbit}>
       <label >First Name</label>
       <input type="text" onChange={handleChange} value={name} />
-      <div className="radio-buttons">
-        <label>
-          <input type="radio" name="side" value="top" onChange={handleRadioChange} />
-          Top
-        </label>
-        <label>
-          <input type="radio" name="side" value="bottom" defaultChecked onChange={handleRadioChange} />
-          Bottom
-        </label>
+      <div className="container-radios">
+        <p className="radio-grp-title">Dining Area</p>
+        <div className="radio-buttons">
+          <label>
+            <input type="radio" name="area" value="bar" onChange={handleAreaChange} />
+            Bar
+          </label>
+          <label>
+            <input type="radio" name="area" value="table" defaultChecked onChange={handleAreaChange} />
+            Table
+          </label>
+        </div>
+        <p className="radio-grp-title">Queue placement</p>
+        <div className="radio-buttons">
+          <label>
+            <input type="radio" name="queue" value="top" onChange={handleQueueChange} />
+            Front
+          </label>
+          <label>
+            <input type="radio" name="queue" value="back" defaultChecked onChange={handleQueueChange} />
+            Back
+          </label>
+        </div>
       </div>
       <input type="submit" />
     </form>
