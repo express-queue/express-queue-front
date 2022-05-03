@@ -21,20 +21,15 @@ export default function AddCustomerForm({ fetchList }) {
     setQueue(e.target.value);
   }
 
-
   async function handleSumbit(e) {
-    console.log('trying to submit')
     e.preventDefault();
-    let endpoint = queue === 'back' ? 'add' : 'prepend';
-    let data = { value: { name } }
+    let data = { value: { name }, area, queue };
 
     try {
-      console.log('keep trying')
-      let response = await axios.post(`${SERVER}/${endpoint}`, data);
+      let response = await axios.post(`${SERVER}/addCustomer`, data);
       console.log('response', response.data)
-      setName('')
-      console.log('keep trying 3')
-      fetchList();
+      setName('');
+      fetchList(area);
     } catch (e) {
       console.log(e.message);
     }
@@ -59,7 +54,7 @@ export default function AddCustomerForm({ fetchList }) {
         <p className="radio-grp-title">Queue placement</p>
         <div className="radio-buttons">
           <label>
-            <input type="radio" name="queue" value="top" onChange={handleQueueChange} />
+            <input type="radio" name="queue" value="front" onChange={handleQueueChange} />
             Front
           </label>
           <label>
