@@ -10,15 +10,24 @@ function App() {
   const [barList, setBarList] = useState([]);
   const [tableList, setTableList] = useState([]);
 
-  async function fetchList() {
-    let response = await axios.get(`${SERVER}/getlist`);
-    setBarList(response.data)
+  async function fetchList(area = 'all') {
+    let response = await axios.get(`${SERVER}/getlist`, { params: { area } });
+    if (area === 'bar' || area === 'all') {
+      console.log('setting bar list')
+      setBarList(response.data)
+      console.log('bar response', response.data)
+    }
+    if (area === 'table' || area === 'all') {
+      console.log('setting table list')
+      setTableList(response.data)
+      console.log('table response', response.data)
+    }
   }
 
-  async function deleteCustomer(id) {
+  async function deleteCustomer(area, id) {
     try {
       await axios.delete(`${SERVER}/delete/${id}`)
-      fetchList();
+      fetchList(area);
     } catch (e) {
       console.log(e.message)
     }
@@ -42,7 +51,7 @@ function App() {
                 className='draggable'
                 draggable='true'>
                 {customer.value.name}
-                <button className='delete-btn' onClick={() => deleteCustomer(customer.id)}>X</button>
+                <button className='delete-btn' onClick={() => deleteCustomer('bar', customer.id)}>X</button>
               </p>
             )
           })}
@@ -56,7 +65,7 @@ function App() {
                 className='draggable'
                 draggable='true'>
                 {customer.value.name}
-                <button className='delete-btn' onClick={() => deleteCustomer(customer.id)}>X</button>
+                <button className='delete-btn' onClick={() => deleteCustomer('table', customer.id)}>X</button>
               </p>
             )
           })}
