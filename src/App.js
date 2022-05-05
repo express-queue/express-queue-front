@@ -26,7 +26,7 @@ function App() {
 
   async function deleteCustomer(area, id) {
     try {
-      await axios.delete(`${SERVER}/delete/${id}`)
+      await axios.delete(`${SERVER}/delete/${id}`, {data: area})
       fetchList(area);
     } catch (e) {
       console.log(e.message)
