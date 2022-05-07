@@ -11,22 +11,19 @@ function App() {
   const [tableList, setTableList] = useState([]);
 
   async function fetchList(area = 'all') {
-    let response = await axios.get(`${SERVER}/getlist`, { params: { area } });
     if (area === 'bar' || area === 'all') {
-      console.log('setting bar list')
-      setBarList(response.data)
-      console.log('bar response', response.data)
+      let response = await axios.get(`${SERVER}/getlist`, { params: { area: 'bar' } });
+      setBarList(response.data);
     }
     if (area === 'table' || area === 'all') {
-      console.log('setting table list')
-      setTableList(response.data)
-      console.log('table response', response.data)
+      let response = await axios.get(`${SERVER}/getlist`, { params: { area: 'table' } });
+      setTableList(response.data);
     }
   }
 
   async function deleteCustomer(area, id) {
     try {
-      await axios.delete(`${SERVER}/delete/${id}`, {data: area})
+      await axios.delete(`${SERVER}/delete/${id}/${area}`)
       fetchList(area);
     } catch (e) {
       console.log(e.message)
