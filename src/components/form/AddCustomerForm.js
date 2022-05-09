@@ -9,6 +9,8 @@ export default function AddCustomerForm({ fetchList }) {
   const [area, setArea] = useState('table')
   const [queue, setQueue] = useState('back');
 
+  
+
   function handleChange(e) {
     setName(e.target.value);
   }
