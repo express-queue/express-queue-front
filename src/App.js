@@ -10,7 +10,7 @@ function App() {
 
   const [barList, setBarList] = useState([]);
   const [tableList, setTableList] = useState([]);
-  const [draggedParent, setDraggedParent] = useState('');
+  const [draggedItem, setDraggedItem] = useState('');
 
   useEffect(() => {
     console.log('ran use effect');
@@ -39,8 +39,8 @@ function App() {
 
 
   function handleDragStart(e) {
-    e.dataTransfer.setData(e.target.id, e.target.id);
-    setDraggedParent(e.target.parentNode.id);
+    // e.dataTransfer.setData(e.target.id, e.target.id);
+    setDraggedItem(e.target);
     setTimeout(() => {
       e.target.style.backgroundColor = 'black';
     }, 0)
@@ -51,9 +51,31 @@ function App() {
   }
 
   function handleDragEnter(e, customer, idx, callback) {
-    console.log('calling handleDragEnter')
-    let draggedID = e.dataTransfer.types[0];
-    if (draggedID !== customer.id) {
+    // let draggedID = e.dataTransfer.types[0];
+    let draggedID = draggedItem.id;
+    console.log(draggedItem)
+    console.log(e.target.parentNode.id)
+
+    if (draggedItem.parentNode.id !== e.target.parentNode.id) {
+      console.log('FOREIGN TERRITORY ! ! ! !')
+      if (e.target.parentNode.id === 'bar'){
+        let removed;
+        setTableList((oldList)=>{
+          let res = JSON.parse(JSON.stringify(oldList));
+          let sourceIndex = res.findIndex(el => el.id === draggedID);
+          removed = res.splice(sourceIndex, 1);
+          console.log()
+          callback((oldList)=>{
+            console.log('what I just removed', removed);
+            let res = JSON.parse(JSON.stringify(oldList));
+            res.splice(idx, 0, removed[0]);
+            return res
+          })
+          return res;
+        })
+      }
+    }
+    else if (draggedID !== customer.id) {
       callback((oldList) => {
         let res = JSON.parse(JSON.stringify(oldList))
         let sourceIndex = res.findIndex(el => el.id === draggedID);
@@ -65,14 +87,7 @@ function App() {
   }
 
   function handleDragLeave(e) {
-    console.log('exited drop zone')
     e.target.classList.remove('blue')
-  }
-
-  function handleBucketEnter(e) {
-    console.log('calling handleBucketEnter')
-    if(draggedParent !== e.target.id){
-    }
   }
 
   return (
@@ -80,8 +95,7 @@ function App() {
       <AddCustomerForm fetchList={fetchList} />
       <section className='container'>
         <div className='sub-container'
-          id='bucket1'
-          onDragOver={handleBucketEnter}>
+          id='bar'>
           {barList.map((customer, idx) => {
             return (
               <p
@@ -91,7 +105,9 @@ function App() {
                 draggable='true'
                 onDragStart={(e) => { handleDragStart(e) }}
                 onDragEnd={handleDragEnd}
-                onDragEnter={(e) => { handleDragEnter(e, customer, idx, setBarList) }}
+                onDragEnter={(e) => {
+                  if (customer.id !== draggedItem.id) handleDragEnter(e, customer, idx, setBarList)
+                }}
                 onDragLeave={handleDragLeave}
                 onDragOver={(e) => { e.preventDefault() }}
               >
@@ -102,9 +118,7 @@ function App() {
           })}
         </div>
         <div className='sub-container'
-          id='bucket2'
-          onDragOver={handleBucketEnter}
-        >
+          id='table'>
           {tableList.map((customer, idx) => {
             return (
               <p
@@ -114,7 +128,9 @@ function App() {
                 draggable='true'
                 onDragStart={(e) => { handleDragStart(e) }}
                 onDragEnd={handleDragEnd}
-                onDragEnter={(e) => { handleDragEnter(e, customer, idx, setTableList) }}
+                onDragEnter={(e) => {
+                  if (customer.id !== draggedItem.id) handleDragEnter(e, customer, idx, setTableList)
+                }}
                 onDragLeave={handleDragLeave}
                 onDragOver={(e) => { e.preventDefault() }}
               >
