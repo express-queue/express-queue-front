@@ -4,12 +4,39 @@ import { useState, useEffect } from 'react';
 import AddCustomerForm from './components/form/AddCustomerForm';
 
 const SERVER = process.env.REACT_APP_SERVER;
-// const initialState = [{ value: { name: 'Ayrat' }, id: '12345' }, { value: { name: 'max' }, id: '54321' }, { value: { name: 'chris' }, id: '66667' }]
+const initialState = {
+  bar: [{
+    value: { name: 'Ayrat' },
+    id: '12345'
+  },
+  {
+    value: { name: 'max' },
+    id: '54321'
+  },
+  {
+    value: { name: 'chris' },
+    id: '66667'
+  }],
+  table: [{
+    value: { name: 'Sam' },
+    id: '123'
+  },
+  {
+    value: { name: 'Ed' },
+    id: '543'
+  },
+  {
+    value: { name: 'Jen' },
+    id: '666'
+  }]
+
+}
 
 function App() {
 
   const [barList, setBarList] = useState([]);
   const [tableList, setTableList] = useState([]);
+  const [queue, setQueue] = useState(initialState);
   const [draggedItem, setDraggedItem] = useState('');
 
   useEffect(() => {
@@ -53,37 +80,16 @@ function App() {
   function handleDragEnter(e, customer, idx, callback) {
     // let draggedID = e.dataTransfer.types[0];
     let draggedID = draggedItem.id;
-    console.log(draggedItem)
-    console.log(e.target.parentNode.id)
+    console.log(draggedItem);
+    console.log(e.target.parentNode.id);
 
-    if (draggedItem.parentNode.id !== e.target.parentNode.id) {
-      console.log('FOREIGN TERRITORY ! ! ! !')
-      if (e.target.parentNode.id === 'bar'){
-        let removed;
-        setTableList((oldList)=>{
-          let res = JSON.parse(JSON.stringify(oldList));
-          let sourceIndex = res.findIndex(el => el.id === draggedID);
-          removed = res.splice(sourceIndex, 1);
-          console.log()
-          callback((oldList)=>{
-            console.log('what I just removed', removed);
-            let res = JSON.parse(JSON.stringify(oldList));
-            res.splice(idx, 0, removed[0]);
-            return res
-          })
-          return res;
-        })
-      }
-    }
-    else if (draggedID !== customer.id) {
-      callback((oldList) => {
-        let res = JSON.parse(JSON.stringify(oldList))
-        let sourceIndex = res.findIndex(el => el.id === draggedID);
-        let removed = res.splice(sourceIndex, 1);
-        res.splice(idx, 0, removed[0])
-        return res
-      })
-    }
+    callback((oldList) => {
+      let res = JSON.parse(JSON.stringify(oldList))
+      let sourceIndex = res.findIndex(el => el.id === draggedID);
+      let removed = res.splice(sourceIndex, 1);
+      res.splice(idx, 0, removed[0])
+      return res
+    })
   }
 
   function handleDragLeave(e) {
