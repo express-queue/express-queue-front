@@ -4,33 +4,26 @@ import { useState, useEffect } from 'react';
 import AddCustomerForm from './components/form/AddCustomerForm';
 
 const SERVER = process.env.REACT_APP_SERVER;
-const initialState = {
-  bar: [{
-    value: { name: 'Ayrat' },
-    id: '12345'
+const initialState = [
+  {
+    area: 'bar',
+    customers:
+      [
+        { value: { name: 'Ayrat' }, id: '12345' },
+        { value: { name: 'max' }, id: '54321' },
+        { value: { name: 'chris' }, id: '66667' }
+      ]
   },
   {
-    value: { name: 'max' },
-    id: '54321'
-  },
-  {
-    value: { name: 'chris' },
-    id: '66667'
-  }],
-  table: [{
-    value: { name: 'Sam' },
-    id: '123'
-  },
-  {
-    value: { name: 'Ed' },
-    id: '543'
-  },
-  {
-    value: { name: 'Jen' },
-    id: '666'
-  }]
+    area: 'table',
+    customers:
+      [
+        { value: { name: 'Sam' }, id: '123' },
+        { value: { name: 'Ed' }, id: '543' },
+        { value: { name: 'Jen' }, id: '666' }]
+  }
+]
 
-}
 
 function App() {
 
@@ -39,10 +32,10 @@ function App() {
   const [queue, setQueue] = useState(initialState);
   const [draggedItem, setDraggedItem] = useState('');
 
-  useEffect(() => {
-    console.log('ran use effect');
-    fetchList();
-  }, [])
+  // useEffect(() => {
+  //   console.log('ran use effect');
+  //   fetchList();
+  // }, [])
 
   async function fetchList(area = 'all') {
     if (area === 'bar' || area === 'all') {
@@ -100,7 +93,34 @@ function App() {
     <>
       <AddCustomerForm fetchList={fetchList} />
       <section className='container'>
-        <div className='sub-container'
+        {queue.map((area, groupIdx) =>
+          <div className='sub-container' key={groupIdx}>
+            <div className='title'>
+              {area.area}
+            </div>
+            <div className='elements'>
+              {area.customers.map((customer, custIdx) =>
+                <p
+                  key={customer.id}
+                  id={customer.id}
+                  className='draggable'
+                  draggable='true'
+                  onDragStart={(e) => { handleDragStart(e) }}
+                  onDragEnd={handleDragEnd}
+                  onDragEnter={(e) => {
+                    if (customer.id !== draggedItem.id) handleDragEnter(e, customer, custIdx, setBarList)
+                  }}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={(e) => { e.preventDefault() }}
+                >
+                  {customer.value.name}
+                  <button className='delete-btn' onClick={() => deleteCustomer('bar', customer.id)}>X</button>
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+        {/*  <div className='sub-container'
           id='bar'>
           {barList.map((customer, idx) => {
             return (
@@ -145,7 +165,7 @@ function App() {
               </p>
             )
           })}
-        </div>
+        </div> */}
       </section>
     </>
   );
