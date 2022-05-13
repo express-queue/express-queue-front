@@ -1,12 +1,12 @@
 import './App.scss';
 import axios from 'axios';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AddCustomerForm from './components/form/AddCustomerForm';
 
 const SERVER = process.env.REACT_APP_SERVER;
 const initialState = [
   {
-    area: 'bar',
+    title: 'bar',
     customers:
       [
         { value: { name: 'Ayrat' }, id: '12345' },
@@ -15,7 +15,7 @@ const initialState = [
       ]
   },
   {
-    area: 'table',
+    title: 'table',
     customers:
       [
         { value: { name: 'Sam' }, id: '123' },
@@ -26,11 +26,12 @@ const initialState = [
 
 
 function App() {
-
-  const [barList, setBarList] = useState([]);
-  const [tableList, setTableList] = useState([]);
   const [queue, setQueue] = useState(initialState);
   const [draggedItem, setDraggedItem] = useState('');
+  const [sourceAreaIdx, setSourceAreaIdx] = useState('');
+  const [dragging, setDragging] = useState(false);
+
+  const draggedElement = useRef();
 
   // useEffect(() => {
   //   console.log('ran use effect');
@@ -40,11 +41,11 @@ function App() {
   async function fetchList(area = 'all') {
     if (area === 'bar' || area === 'all') {
       let response = await axios.get(`${SERVER}/getlist`, { params: { area: 'bar' } });
-      setBarList(response.data);
+      // setBarList(response.data);
     }
     if (area === 'table' || area === 'all') {
       let response = await axios.get(`${SERVER}/getlist`, { params: { area: 'table' } });
-      setTableList(response.data);
+      // setTableList(response.data);
     }
   }
 
@@ -58,57 +59,71 @@ function App() {
   }
 
 
-  function handleDragStart(e) {
+  function handleDragStart(e, areaIdx, custIdx) {
     // e.dataTransfer.setData(e.target.id, e.target.id);
-    setDraggedItem(e.target);
+    let draggedItem = queue[areaIdx].customers[custIdx];
+    draggedElement.current = e.target;
+    setDraggedItem(draggedItem);
+    setSourceAreaIdx(areaIdx);
     setTimeout(() => {
-      e.target.style.backgroundColor = 'black';
+      setDragging(true)
     }, 0)
+    draggedElement.current.addEventListener('dragend', handleDragEnd)
   }
 
   function handleDragEnd(e) {
-    e.target.style.backgroundColor = 'white';
+    setDragging(false);
+    draggedElement.current.removeEventListener('dragend', handleDragEnd)
+    draggedElement.current = null;
   }
 
-  function handleDragEnter(e, customer, idx, callback) {
-    // let draggedID = e.dataTransfer.types[0];
-    let draggedID = draggedItem.id;
-    console.log(draggedItem);
-    console.log(e.target.parentNode.id);
-
-    callback((oldList) => {
-      let res = JSON.parse(JSON.stringify(oldList))
-      let sourceIndex = res.findIndex(el => el.id === draggedID);
-      let removed = res.splice(sourceIndex, 1);
-      res.splice(idx, 0, removed[0])
-      return res
+  function handleDragEnter(areaIdx, custIdx) {
+    setQueue((oldList) => {
+      let list = JSON.parse(JSON.stringify(oldList));
+      if (!list[areaIdx].customers.length || draggedItem.id !== list[areaIdx].customers[custIdx].id) {
+        let sourceIdx = list[sourceAreaIdx].customers.findIndex((person) => draggedItem.id === person.id)
+        let removed = list[sourceAreaIdx].customers.splice(sourceIdx, 1);
+        console.log('new list', list);
+        list[areaIdx].customers.splice(custIdx, 0, removed[0]);
+        setSourceAreaIdx(areaIdx);
+      }
+      return list
     })
+
+
   }
 
   function handleDragLeave(e) {
     e.target.classList.remove('blue')
   }
 
+  function getStyle(customerId) {
+    if (draggedItem.id === customerId) {
+      return 'blackened draggable'
+    }
+    return 'draggable'
+  }
+
   return (
     <>
       <AddCustomerForm fetchList={fetchList} />
       <section className='container'>
-        {queue.map((area, groupIdx) =>
-          <div className='sub-container' key={groupIdx}>
+        {queue.map((area, areaIdx) =>
+          <div className='sub-container' key={areaIdx} onDragEnter={area.customers.length ? undefined : ()=>{handleDragEnter(areaIdx, 0)}}>
             <div className='title'>
-              {area.area}
+              {area.title}
             </div>
             <div className='elements'>
               {area.customers.map((customer, custIdx) =>
                 <p
                   key={customer.id}
                   id={customer.id}
-                  className='draggable'
+                  className={dragging ? getStyle(customer.id) : 'draggable'}
                   draggable='true'
-                  onDragStart={(e) => { handleDragStart(e) }}
-                  onDragEnd={handleDragEnd}
+                  onDragStart={(e) => { handleDragStart(e, areaIdx, custIdx) }}
+                  // onDragEnd={handleDragEnd}
                   onDragEnter={(e) => {
-                    if (customer.id !== draggedItem.id) handleDragEnter(e, customer, custIdx, setBarList)
+                    if (customer.id !== draggedItem.id) handleDragEnter(areaIdx, custIdx)
                   }}
                   onDragLeave={handleDragLeave}
                   onDragOver={(e) => { e.preventDefault() }}
