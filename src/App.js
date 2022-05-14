@@ -24,7 +24,6 @@ const initialState = [
   }
 ]
 
-
 function App() {
   const [queue, setQueue] = useState(initialState);
   const [draggedItem, setDraggedItem] = useState('');
@@ -83,14 +82,11 @@ function App() {
       if (!list[areaIdx].customers.length || draggedItem.id !== list[areaIdx].customers[custIdx].id) {
         let sourceIdx = list[sourceAreaIdx].customers.findIndex((person) => draggedItem.id === person.id)
         let removed = list[sourceAreaIdx].customers.splice(sourceIdx, 1);
-        console.log('new list', list);
         list[areaIdx].customers.splice(custIdx, 0, removed[0]);
         setSourceAreaIdx(areaIdx);
       }
       return list
     })
-
-
   }
 
   function handleDragLeave(e) {
@@ -109,7 +105,9 @@ function App() {
       <AddCustomerForm fetchList={fetchList} />
       <section className='container'>
         {queue.map((area, areaIdx) =>
-          <div className='sub-container' key={areaIdx} onDragEnter={area.customers.length ? undefined : ()=>{handleDragEnter(areaIdx, 0)}}>
+          <div className='sub-container'
+            key={areaIdx}
+            onDragEnter={area.customers.length ? undefined : () => { handleDragEnter(areaIdx, 0) }}>
             <div className='title'>
               {area.title}
             </div>
@@ -121,7 +119,6 @@ function App() {
                   className={dragging ? getStyle(customer.id) : 'draggable'}
                   draggable='true'
                   onDragStart={(e) => { handleDragStart(e, areaIdx, custIdx) }}
-                  // onDragEnd={handleDragEnd}
                   onDragEnter={(e) => {
                     if (customer.id !== draggedItem.id) handleDragEnter(areaIdx, custIdx)
                   }}
