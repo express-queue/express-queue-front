@@ -9,7 +9,7 @@ const initialState = [
     title: 'bar',
     customers:
       [
-        // { value: { name: 'Ayrat' }, id: '12345' },
+        { value: { name: 'Ayrat' }, id: '12345' },
         // { value: { name: 'max' }, id: '54321' },
         // { value: { name: 'chris' }, id: '66667' }
       ]
@@ -28,11 +28,7 @@ const initialState = [
 function App() {
   const [queue, setQueue] = useState(initialState);
   const [draggedItem, setDraggedItem] = useState('');
-  // const [sourceAreaIdx, setSourceAreaIdx] = useState('');
-  // const [currentDragIdx, setCurrDragIdx] = useState('');
-  // const [targetAreaIdx, setTargetAreaIdx] = useState('');
   const [dragging, setDragging] = useState(false);
-  const [afterDragEl, setAfterDragEl] = useState('initial');
 
   const draggedElement = useRef();
   const draggedIdx = useRef();
@@ -65,16 +61,13 @@ function App() {
     }
   }
 
-
   function handleDragStart(e, areaIdx, custIdx) {
     let draggedItem = queue[areaIdx].customers[custIdx];
     draggedElement.current = e.target;
     draggedIdx.current = { areaIdx, custIdx };
     setDraggedItem(draggedItem);
     sourceAreaIdx.current = areaIdx;
-    // setSourceAreaIdx(areaIdx);
     currentDragIdx.current = custIdx;
-    // setCurrDragIdx(custIdx);
     setTimeout(() => {
       setDragging(true)
     }, 0)
@@ -86,19 +79,6 @@ function App() {
     draggedElement.current.removeEventListener('dragend', handleDragEnd)
     draggedElement.current = null;
   }
-
-  // function handleDragEnter(areaIdx, custIdx) {
-  //   setQueue((oldList) => {
-  //     let list = JSON.parse(JSON.stringify(oldList));
-  //     if (!list[areaIdx].customers.length || draggedItem.id !== list[areaIdx].customers[custIdx].id) {
-  //       let sourceIdx = list[sourceAreaIdx].customers.findIndex((person) => draggedItem.id === person.id)
-  //       let removed = list[sourceAreaIdx].customers.splice(sourceIdx, 1);
-  //       list[areaIdx].customers.splice(custIdx, 0, removed[0]);
-  //       setSourceAreaIdx(areaIdx);
-  //     }
-  //     return list
-  //   })
-  // }
 
   function handleDragOver(e, areaIdx) {
     e.preventDefault();
@@ -114,47 +94,30 @@ function App() {
       }
     }, { offset: Number.NEGATIVE_INFINITY }).element;
     const afterId = newAfterDragElement && newAfterDragElement.id;
-    setTimeout(() => {
-      sourceAreaIdx.current = areaIdx;
-    }, 0);
 
-    if (newAfterDragElement !== afterDragEl) {
-      setAfterDragEl(afterId);
-    };
-
-    if (newAfterDragElement === afterDragEl && areaIdx !== sourceAreaIdx.current) {
-      console.log('gotta do something!!!')
-    };
-  }
-
-  useEffect(() => {
-    if (afterDragEl === 'initial') return;
-    else if (!afterDragEl) {
-      setQueue(queue => {
-        console.log('ran empty setQueue')
-        let copyQueue = JSON.parse(JSON.stringify(queue));
-        let removed = copyQueue[sourceAreaIdx.current].customers.splice(currentDragIdx.current, 1)[0];
+    setQueue(queue => {
+      console.log('ran setQueue')
+      let copyQueue = JSON.parse(JSON.stringify(queue));
+      let removed = copyQueue[sourceAreaIdx.current].customers.splice(currentDragIdx.current, 1)[0];
+      if (!afterId) {
         copyQueue[targetAreaIdx.current].customers.push(removed);
         setTimeout(() => {
           currentDragIdx.current = copyQueue[targetAreaIdx.current].customers.length - 1;
         }, 0)
-        return copyQueue;
-      })
-    }
-    else {
-      setQueue(queue => {
-        console.log('ran setQueue')
-        let copyQueue = JSON.parse(JSON.stringify(queue));
-        let removed = copyQueue[sourceAreaIdx.current].customers.splice(currentDragIdx.current, 1)[0]
-        let targetCustIdx = copyQueue[targetAreaIdx.current].customers.findIndex((person) => afterDragEl === person.id);
+      } else {
+        let targetCustIdx = copyQueue[targetAreaIdx.current].customers.findIndex((person) => afterId === person.id);
         copyQueue[targetAreaIdx.current].customers.splice(targetCustIdx, 0, removed);
         setTimeout(() => {
           currentDragIdx.current = targetCustIdx;
-        }, 0)
-        return copyQueue;
-      })
-    }
-  }, [afterDragEl])
+        }, 0);
+      }
+      return copyQueue;
+    })
+    setTimeout(() => {
+      sourceAreaIdx.current = areaIdx;
+    }, 0);
+
+  }
 
   function getStyle(customerId) {
     if (draggedItem.id === customerId) {
