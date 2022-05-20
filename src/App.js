@@ -9,7 +9,7 @@ const initialState = [
     title: 'bar',
     customers:
       [
-        { value: { name: 'Ayrat' }, id: '12345' },
+        // { value: { name: 'Ayrat' }, id: '12345' },
         // { value: { name: 'max' }, id: '54321' },
         // { value: { name: 'chris' }, id: '66667' }
       ]
@@ -29,12 +29,11 @@ function App() {
   const [queue, setQueue] = useState(initialState);
   const [draggedItem, setDraggedItem] = useState('');
   const [dragging, setDragging] = useState(false);
+  const [currentDragIdx, setCurrDragIdx] = useState('');
+  const [sourceAreaIdx, setSourceAreaIdx] = useState('');
+
 
   const draggedElement = useRef();
-  const draggedIdx = useRef();
-  const sourceAreaIdx = useRef();
-  const currentDragIdx = useRef();
-  const targetAreaIdx = useRef();
 
   // useEffect(() => {
   //   console.log('ran use effect');
@@ -64,10 +63,9 @@ function App() {
   function handleDragStart(e, areaIdx, custIdx) {
     let draggedItem = queue[areaIdx].customers[custIdx];
     draggedElement.current = e.target;
-    draggedIdx.current = { areaIdx, custIdx };
     setDraggedItem(draggedItem);
-    sourceAreaIdx.current = areaIdx;
-    currentDragIdx.current = custIdx;
+    setSourceAreaIdx(areaIdx); 
+    setCurrDragIdx(custIdx);
     setTimeout(() => {
       setDragging(true)
     }, 0)
@@ -82,7 +80,6 @@ function App() {
 
   function handleDragOver(e, areaIdx) {
     e.preventDefault();
-    targetAreaIdx.current = (areaIdx);
     const draggableElements = [...document.querySelector(`.${queue[areaIdx].title}-elements`).querySelectorAll('.draggable:not(.blackened)')]
     const newAfterDragElement = draggableElements.reduce((closest, child) => {
       const box = child.getBoundingClientRect();
@@ -98,25 +95,18 @@ function App() {
     setQueue(queue => {
       console.log('ran setQueue')
       let copyQueue = JSON.parse(JSON.stringify(queue));
-      let removed = copyQueue[sourceAreaIdx.current].customers.splice(currentDragIdx.current, 1)[0];
+      let removed = copyQueue[sourceAreaIdx].customers.splice(currentDragIdx, 1)[0];
       if (!afterId) {
-        copyQueue[targetAreaIdx.current].customers.push(removed);
-        setTimeout(() => {
-          currentDragIdx.current = copyQueue[targetAreaIdx.current].customers.length - 1;
-        }, 0)
+        copyQueue[areaIdx].customers.push(removed);
+        setCurrDragIdx(copyQueue[areaIdx].customers.length - 1)
       } else {
-        let targetCustIdx = copyQueue[targetAreaIdx.current].customers.findIndex((person) => afterId === person.id);
-        copyQueue[targetAreaIdx.current].customers.splice(targetCustIdx, 0, removed);
-        setTimeout(() => {
-          currentDragIdx.current = targetCustIdx;
-        }, 0);
+        let targetCustIdx = copyQueue[areaIdx].customers.findIndex((person) => afterId === person.id);
+        copyQueue[areaIdx].customers.splice(targetCustIdx, 0, removed);
+        setCurrDragIdx(targetCustIdx);
       }
       return copyQueue;
-    })
-    setTimeout(() => {
-      sourceAreaIdx.current = areaIdx;
-    }, 0);
-
+    });
+    setSourceAreaIdx(areaIdx);
   }
 
   function getStyle(customerId) {
@@ -126,7 +116,6 @@ function App() {
     return 'draggable'
   }
 
-
   return (
     <>
       <AddCustomerForm fetchList={fetchList} />
@@ -134,7 +123,6 @@ function App() {
         {queue.map((area, areaIdx) =>
           <div className='sub-container'
             key={areaIdx}
-            // onDragEnter={area.customers.length ? undefined : () => { handleDragEnter(areaIdx, 0) }}
             onDragOver={e => { handleDragOver(e, areaIdx) }}
             onDragEnter={(e) => { e.preventDefault() }}
           >
@@ -149,11 +137,6 @@ function App() {
                   className={dragging ? getStyle(customer.id) : 'draggable'}
                   draggable='true'
                   onDragStart={(e) => { handleDragStart(e, areaIdx, custIdx) }}
-                // onDragEnter={(e) => {
-                //   if (customer.id !== draggedItem.id) handleDragEnter(areaIdx, custIdx)
-                // }}
-                // onDragLeave={handleDragLeave}
-                // onDragOver={(e) => { e.preventDefault() }}
                 >
                   {customer.value.name}
                   <button className='delete-btn' onClick={() => deleteCustomer('bar', customer.id)}>X</button>
@@ -161,53 +144,7 @@ function App() {
               )}
             </div>
           </div>
-        )}
-        {/*  <div className='sub-container'
-          id='bar'>
-          {barList.map((customer, idx) => {
-            return (
-              <p
-                key={customer.id}
-                id={customer.id}
-                className='draggable'
-                draggable='true'
-                onDragStart={(e) => { handleDragStart(e) }}
-                onDragEnd={handleDragEnd}
-                onDragEnter={(e) => {
-                  if (customer.id !== draggedItem.id) handleDragEnter(e, customer, idx, setBarList)
-                }}
-                onDragLeave={handleDragLeave}
-                onDragOver={(e) => { e.preventDefault() }}
-              >
-                {customer.value.name}
-                <button className='delete-btn' onClick={() => deleteCustomer('bar', customer.id)}>X</button>
-              </p>
-            )
-          })}
-        </div>
-        <div className='sub-container'
-          id='table'>
-          {tableList.map((customer, idx) => {
-            return (
-              <p
-                key={customer.id}
-                id={customer.id}
-                className='draggable'
-                draggable='true'
-                onDragStart={(e) => { handleDragStart(e) }}
-                onDragEnd={handleDragEnd}
-                onDragEnter={(e) => {
-                  if (customer.id !== draggedItem.id) handleDragEnter(e, customer, idx, setTableList)
-                }}
-                onDragLeave={handleDragLeave}
-                onDragOver={(e) => { e.preventDefault() }}
-              >
-                {customer.value.name}
-                <button className='delete-btn' onClick={() => deleteCustomer('table', customer.id)}>X</button>
-              </p>
-            )
-          })}
-        </div> */}
+        )}       
       </section>
     </>
   );
