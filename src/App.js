@@ -41,6 +41,18 @@ function App() {
   // }, [])
 
   async function fetchList(area = 'all') {
+    let response = await axios.get(`${SERVER}/getlist`, { params: { area } })
+    let resQueue = response.data;
+    setQueue(oldQueue => {
+      let copyQ = JSON.parse(JSON.stringify(oldQueue));
+      copyQ.forEach(sittingArea => {
+        if(sittingArea.title === area){
+          sittingArea.customers = resQueue;
+        };        
+      })
+      return copyQ
+    });
+
     if (area === 'bar' || area === 'all') {
       let response = await axios.get(`${SERVER}/getlist`, { params: { area: 'bar' } });
       // setBarList(response.data);
@@ -139,7 +151,7 @@ function App() {
                   onDragStart={(e) => { handleDragStart(e, areaIdx, custIdx) }}
                 >
                   {customer.value.name}
-                  <button className='delete-btn' onClick={() => deleteCustomer('bar', customer.id)}>X</button>
+                  <button className='delete-btn' onClick={() => deleteCustomer(area.title, customer.id)}>X</button>
                 </p>
               )}
             </div>
