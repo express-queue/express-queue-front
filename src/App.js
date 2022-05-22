@@ -40,7 +40,7 @@ function App() {
   //   fetchList();
   // }, [])
 
-  async function fetchList(area = 'all') {
+  async function fetchList(area) {
     let response = await axios.get(`${SERVER}/getlist`, { params: { area } })
     let resQueue = response.data;
     setQueue(oldQueue => {
