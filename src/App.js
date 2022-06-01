@@ -6,6 +6,15 @@ import AddCustomerForm from './components/form/AddCustomerForm';
 const SERVER = process.env.REACT_APP_SERVER;
 const initialState = [
   {
+    title: 'patio',
+    customers:
+      [
+        // { value: { name: 'Ayrat' }, id: '12345' },
+        // { value: { name: 'max' }, id: '54321' },
+        // { value: { name: 'chris' }, id: '66667' }
+      ]
+  },
+  {
     title: 'bar',
     customers:
       [
@@ -39,6 +48,12 @@ function App() {
   //   console.log('ran use effect');
   //   fetchList();
   // }, [])
+
+  async function fetchAll(){
+    let response = await axios.get(`${SERVER}/getAll`);
+    let queue = response.data;
+    setQueue(queue);    
+  }
 
   async function fetchList(area) {
     let response = await axios.get(`${SERVER}/getlist`, { params: { area } })
