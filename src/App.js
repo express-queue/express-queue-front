@@ -1,6 +1,6 @@
 import './App.scss';
 import axios from 'axios';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import AddCustomerForm from './components/form/AddCustomerForm';
 
 const SERVER = process.env.REACT_APP_SERVER;
@@ -49,11 +49,11 @@ function App() {
   //   fetchList();
   // }, [])
 
-  async function fetchAll(){
+/*   async function fetchAll() {
     let response = await axios.get(`${SERVER}/getAll`);
     let queue = response.data;
-    setQueue(queue);    
-  }
+    setQueue(queue);
+  } */
 
   async function fetchList(area) {
     let response = await axios.get(`${SERVER}/getlist`, { params: { area } })
@@ -61,21 +61,21 @@ function App() {
     setQueue(oldQueue => {
       let copyQ = JSON.parse(JSON.stringify(oldQueue));
       copyQ.forEach(sittingArea => {
-        if(sittingArea.title === area){
+        if (sittingArea.title === area) {
           sittingArea.customers = resQueue;
-        };        
+        };
       })
       return copyQ
     });
 
-    if (area === 'bar' || area === 'all') {
+/*     if (area === 'bar' || area === 'all') {
       let response = await axios.get(`${SERVER}/getlist`, { params: { area: 'bar' } });
       // setBarList(response.data);
     }
     if (area === 'table' || area === 'all') {
       let response = await axios.get(`${SERVER}/getlist`, { params: { area: 'table' } });
       // setTableList(response.data);
-    }
+    } */
   }
 
   async function deleteCustomer(area, id) {
@@ -91,7 +91,7 @@ function App() {
     let draggedItem = queue[areaIdx].customers[custIdx];
     draggedElement.current = e.target;
     setDraggedItem(draggedItem);
-    setSourceAreaIdx(areaIdx); 
+    setSourceAreaIdx(areaIdx);
     setCurrDragIdx(custIdx);
     setTimeout(() => {
       setDragging(true)
@@ -171,7 +171,7 @@ function App() {
               )}
             </div>
           </div>
-        )}       
+        )}
       </section>
     </>
   );
